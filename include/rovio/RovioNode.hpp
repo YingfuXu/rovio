@@ -29,6 +29,9 @@
 #ifndef ROVIO_ROVIONODE_HPP_
 #define ROVIO_ROVIONODE_HPP_
 
+#include <iostream>
+#include <fstream>
+
 #include <memory>
 #include <mutex>
 #include <queue>
@@ -664,11 +667,16 @@ class RovioNode{
 
         // Obtain the save filter state.
         mtFilterState& filterState = mpFilter_->safe_;
-	mtState& state = mpFilter_->safe_.state_;
+	      mtState& state = mpFilter_->safe_.state_;
         state.updateMultiCameraExtrinsics(&mpFilter_->multiCamera_);
         MXD& cov = mpFilter_->safe_.cov_;
         imuOutputCT_.transformState(state,imuOutput_);
-
+        // Yingfu output save traj
+        std::cout <<std::fixed<<mpFilter_->safe_.t_<< " " << imuOutput_.WrWB()(0) << " " << imuOutput_.WrWB()(1)<< " " << imuOutput_.WrWB()(2)<< " " << imuOutput_.qBW().x()<< " " <<imuOutput_.qBW().y()<< " " <<imuOutput_.qBW().z()<< " " <<-imuOutput_.qBW().w()<< std::endl;
+        std::ofstream myfile;
+        myfile.open ("/home/yingfu/VIO/ROVIO_ws/stamped_traj_estimate.txt", std::ios::app);
+        myfile <<std::fixed<<mpFilter_->safe_.t_<< " " << imuOutput_.WrWB()(0) << " " << imuOutput_.WrWB()(1)<< " " << imuOutput_.WrWB()(2)<< " " << imuOutput_.qBW().x()<< " " <<imuOutput_.qBW().y()<< " " <<imuOutput_.qBW().z()<< " " <<-imuOutput_.qBW().w() <<std::endl;
+        myfile.close();
         // Cout verbose for pose measurements
         if(mpImgUpdate_->verbose_){
           if(mpPoseUpdate_->inertialPoseIndex_ >=0){
